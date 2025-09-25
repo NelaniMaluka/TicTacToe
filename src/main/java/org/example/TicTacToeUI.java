@@ -8,62 +8,78 @@ import java.util.Objects;
 import java.util.Random;
 
 public class TicTacToeUI {
-    private JLabel textLabel;
-    private JButton[][] board;
-    private JLabel xScoreLabel;
-    private JLabel oScoreLabel;
-    private String human;
-    private String ai;
-    private String currentPlayer;
-    private int boardSize;
-    private boolean gameOver = false;
-    private boolean isTie = false;
-    private int turns = 0;
-    private int humanScore = 0;
-    private int aiScore = 0;
+    /* -------------------- UI Components -------------------- */
+    private JLabel textLabel; // Shows game status (e.g., "X's turn", "AI won")
+    private JButton[][] board; // 2D array of buttons representing the Tic-Tac-Toe grid
+    private JLabel xScoreLabel; // Label for human score
+    private JLabel oScoreLabel; // Label for AI score
 
-    private final CardLayout cardLayout;
-    private final JPanel mainPanel;
-    private GameSettings gameSettings;
+    /* -------------------- Game State -------------------- */
+    private String human; // Symbol for human player ("X" or "O")
+    private String ai; // Symbol for AI player
+    private String currentPlayer; // Tracks whose turn it is
+    private int boardSize; // Size of the board (3, 4, or 5)
+    private boolean gameOver = false; // Flag to indicate if game has ended
+    private boolean isTie = false; // Flag for tie game
+    private int turns = 0; // Counter for moves played
+    private int humanScore = 0; // Tracks human player's wins
+    private int aiScore = 0; // Tracks AI player's wins
 
-    // Constructor: inject cardLayout + mainPanel (so we can go "Back")
+    /* -------------------- Navigation -------------------- */
+    private final CardLayout cardLayout; // CardLayout to switch between screens
+    private final JPanel mainPanel; // Main container panel holding all screens
+    private GameSettings gameSettings; // Holds current game configuration (board size, difficulty, symbol)
+
+    /**
+     * Constructor for TicTacToeUI.
+     *
+     * @param cardLayout Reference to CardLayout for switching between screens
+     * @param mainPanel  Reference to main container panel
+     */
     public TicTacToeUI(CardLayout cardLayout, JPanel mainPanel) {
         this.cardLayout = cardLayout;
         this.mainPanel = mainPanel;
     }
 
+    /**
+     * Builds and returns the main game UI panel for Tic-Tac-Toe.
+     * Includes heading (scores + title), game board, and footer (buttons).
+     */
     public JPanel gameUi(GameSettings gameSettings) {
         this.gameSettings = gameSettings;
         boardSize = gameSettings.boardSize();
 
+        // Assign player symbols
         human = gameSettings.playAs();
         ai = !human.equals("X") ? "X" : "O";
 
+        // Initialize board and current player
         board = new JButton[boardSize][boardSize];
         currentPlayer = human;
 
         JPanel gamePanel = new JPanel(new BorderLayout());
 
+        /* -------------------- Heading (Scores + Title) -------------------- */
         JPanel headingPanel = new JPanel(new BorderLayout());
         headingPanel.setMaximumSize(headingPanel.getPreferredSize());
         headingPanel.setBackground(Color.darkGray);
         headingPanel.setBorder(BorderFactory.createEmptyBorder(0, 40, 0, 40));
 
-        // X score
+        // Human score
         xScoreLabel = new JLabel("Human: " + humanScore, SwingConstants.CENTER);
         xScoreLabel.setBackground(Color.darkGray);
         xScoreLabel.setForeground(Color.white);
         xScoreLabel.setFont(new Font("Arial", Font.BOLD, 18));
         xScoreLabel.setOpaque(true);
 
-        // y score
+        // AI score
         oScoreLabel = new JLabel("AI: " + aiScore, SwingConstants.CENTER);
         oScoreLabel.setBackground(Color.darkGray);
         oScoreLabel.setForeground(Color.white);
         oScoreLabel.setFont(new Font("Arial", Font.BOLD, 18));
         oScoreLabel.setOpaque(true);
 
-        // Heading text
+        // Title
         textLabel = new JLabel("Tic-Tac-Toe", SwingConstants.CENTER);
         textLabel.setBackground(Color.darkGray);
         textLabel.setForeground(Color.white);
@@ -71,11 +87,11 @@ public class TicTacToeUI {
         textLabel.setOpaque(true);
 
         headingPanel.add(xScoreLabel, BorderLayout.WEST);
-        headingPanel.add(textLabel);
+        headingPanel.add(textLabel, BorderLayout.CENTER);
         headingPanel.add(oScoreLabel, BorderLayout.EAST);
         gamePanel.add(headingPanel, BorderLayout.NORTH);
 
-        // Board
+        /* -------------------- Game Board -------------------- */
         JPanel boardPanel = new JPanel(new GridLayout(boardSize, boardSize));
         boardPanel.setBackground(Color.darkGray);
 
@@ -85,30 +101,31 @@ public class TicTacToeUI {
                 board[row][col] = tile;
                 boardPanel.add(tile);
 
+                // Tile styling
                 tile.setBackground(Color.darkGray);
                 tile.setForeground(Color.white);
                 tile.setFont(new Font("Arial", Font.BOLD, 80));
                 tile.setFocusable(false);
 
+                // Handle player move when clicked
                 tile.addActionListener(e -> handleMove(tile));
             }
         }
-
         gamePanel.add(boardPanel, BorderLayout.CENTER);
 
-        // Footer
+        /* -------------------- Footer (Buttons) -------------------- */
         JPanel footerPanel = new JPanel(new BorderLayout());
         footerPanel.setBackground(Color.darkGray);
         footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 40, 10, 40));
 
-        // Reset Button
+        // Reset button
         JButton resetButton = new JButton("Reset Game");
         resetButton.setFont(new Font("Arial", Font.BOLD, 15));
         resetButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         resetButton.setMaximumSize(new Dimension(150, 25));
         resetButton.addActionListener(e -> resetGame());
 
-        // Back Button
+        // Back button
         JButton backButton = new JButton("Back to Home");
         backButton.setFont(new Font("Arial", Font.BOLD, 15));
         backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -125,24 +142,28 @@ public class TicTacToeUI {
         return gamePanel;
     }
 
+    // Handles a move for either the human or AI player
     private void handleMove(JButton tile) {
         if (gameOver)
-            return;
+            return; // ignore if game already ended
 
         if (tile.getText().isEmpty()) {
-            tile.setText(currentPlayer);
+            tile.setText(currentPlayer); // place symbol
             turns++;
             checkWinner();
 
             if (!gameOver) {
+                // Switch to other player and update status label
                 currentPlayer = Objects.equals(currentPlayer, human) ? ai : human;
                 textLabel.setText(currentPlayer + "'s turn");
             }
 
+            // Trigger AI move automatically if it's AI's turn
             if (!gameOver && currentPlayer.equals(ai)) {
-                aiMove(); // let the AI play
+                aiMove();
             }
 
+            // Update score if game ended with a winner
             if (gameOver && !isTie) {
                 if (currentPlayer.equals(human))
                     xScoreLabel.setText("Human: " + ++humanScore);
@@ -252,38 +273,43 @@ public class TicTacToeUI {
         }
     }
 
-    // AI move
+    // Executes the AI's move based on the selected difficulty
     private void aiMove() {
         List<int[]> emptyCells = getAvailbleBlocks();
         MinimaxAI aiEngine = new MinimaxAI(ai, human, boardSize);
+
         if (emptyCells.isEmpty())
             return;
-        int row;
-        int col;
 
+        int row, col;
+
+        // Select move depending on difficulty
         if (gameSettings.difficulty().equals("Hard")) {
-            String[][] state = getBoardState();
-            int[] bestMove = aiEngine.findBestMove(state);
+            // Use full-depth minimax
+            int[] bestMove = aiEngine.findBestMove(getBoardState());
             row = bestMove[0];
             col = bestMove[1];
         } else if (gameSettings.difficulty().equals("Medium")) {
-            String[][] state = getBoardState();
-            int[] bestMove = aiEngine.findBestMoveWithDepthLimit(state, 2); // only look ahead 2 moves
+            // Use minimax with depth limit (less "smart")
+            int[] bestMove = aiEngine.findBestMoveWithDepthLimit(getBoardState(), 2);
             row = bestMove[0];
             col = bestMove[1];
         } else {
+            // Easy mode → pick random available cell
             int[] move = emptyCells.get(new Random().nextInt(emptyCells.size()));
             row = move[0];
             col = move[1];
         }
 
+        // Place AI's move on the board
         JButton tile = board[row][col];
         tile.setText(ai);
         turns++;
         checkWinner();
 
+        // If game not over → switch turn back to human
         if (!gameOver) {
-            currentPlayer = human; // switch back
+            currentPlayer = human;
             textLabel.setText(human + "'s turn");
         }
     }
