@@ -26,8 +26,11 @@ A desktop-based Tic-Tac-Toe game built in **Java** using **Swing** for the GUI. 
 ---
 
 ## Demo
-![Demo Screenshot](path/to/screenshot.png)  
-*Add a screenshot or GIF of your game here.*
+<img src="https://github.com/NelaniMaluka/TicTacToe/blob/main/readme%20images/1.png" alt="Home Screen" width="400"/>
+<img src="https://github.com/NelaniMaluka/TicTacToe/blob/main/readme%20images/2.png" alt="3 Tile win" width="400"/>
+<img src="https://github.com/NelaniMaluka/TicTacToe/blob/main/readme%20images/3.png" alt="Tie" width="400"/>
+<img src="https://github.com/NelaniMaluka/TicTacToe/blob/main/readme%20images/4.png" alt="4 Tile win" width="400"/>
+<img src="https://github.com/NelaniMaluka/TicTacToe/blob/main/readme%20images/5.png" alt="5 Tile win" width="400"/>
 
 ---
 
@@ -35,7 +38,7 @@ A desktop-based Tic-Tac-Toe game built in **Java** using **Swing** for the GUI. 
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/tic-tac-toe-java.git
+   git clone git clone https://github.com/NelaniMaluka/TicTacToe.git
    ```
 2. Navigate to the project directory:
    ```bash
